@@ -1,5 +1,8 @@
 package dao.controle;
 
+import net.sf.cglib.proxy.Enhancer;
+import servico.controle.InterceptadorDeServico;
+
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
@@ -24,8 +27,15 @@ public class FabricaDeDAOs
         String nomeDaClasse = null;
 
         try
-        {	nomeDaClasse = prop.getString(tipo.getSimpleName());
+        {
+            nomeDaClasse = prop.getString(tipo.getSimpleName());
             dao = (T) Class.forName(nomeDaClasse).newInstance();
+
+            nomeDaClasse = prop.getString(tipo.getSimpleName());
+
+            Class<?> classeDoDAO = Class.forName(nomeDaClasse);
+
+            return (T) Enhancer.create (classeDoDAO, new InterceptadorDeDAOs());
         }
         catch (InstantiationException e)
         {	System.out.println("Não foi possivel criar um objeto do tipo " + nomeDaClasse);
@@ -44,7 +54,6 @@ public class FabricaDeDAOs
             throw new RuntimeException(e);
         }
 
-        return dao;
     }
 }
 
